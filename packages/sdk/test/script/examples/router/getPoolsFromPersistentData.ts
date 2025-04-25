@@ -1,5 +1,5 @@
 import { ApiPromise } from '@polkadot/api';
-import { PoolService, PoolType, TradeRouter } from '../../../../src';
+import { PoolService, TradeRouter } from '../../../../src';
 
 import { PolkadotExecutor } from '../../PjsExecutor';
 import { ApiUrl } from '../../types';
@@ -7,9 +7,7 @@ import { ApiUrl } from '../../types';
 class GetPoolsExample extends PolkadotExecutor {
   async script(api: ApiPromise): Promise<any> {
     const poolService = new PoolService(api);
-    const router = new TradeRouter(poolService, {
-      includeOnly: [PoolType.Omni],
-    });
+    const router = new TradeRouter(poolService);
     return router.getPools();
   }
 }

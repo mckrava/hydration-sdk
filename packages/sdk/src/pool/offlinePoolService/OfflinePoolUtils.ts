@@ -1,0 +1,376 @@
+import { BigNumber, bnum, scale } from '../../utils/bignumber';
+import {
+  IOfflinePoolServiceDataSource,
+  IPersistentDataInput,
+  IPersistentLbpPoolBase,
+  IPersistentOmniPoolBase,
+  IPersistentOmniPoolToken,
+  IPersistentPoolBase,
+  IPersistentPoolToken,
+  IPersistentStableSwapBase,
+  PersistentAsset,
+} from './types';
+import { Asset, PoolBase, PoolFee, PoolToken, PoolType } from '../../types';
+import { StableMath } from '../stable/StableMath';
+import { toPoolFee } from '../../utils/mapper';
+import { OmniPoolBase, OmniPoolToken } from '../omni/OmniPool';
+import { LbpPoolBase, WeightedPoolToken } from '../lbp/LbpPool';
+import { LbpMath } from '../lbp/LbpMath';
+import { StableSwapBase } from '../stable/StableSwap';
+
+export class OfflinePoolUtils {
+  private static readonly MAX_FINAL_WEIGHT = scale(bnum(100), 6);
+
+  static fromPersistentDataToDataSource(
+    persistentData: IPersistentDataInput
+  ): IOfflinePoolServiceDataSource {
+    if (!persistentData.assets || persistentData.assets.length == 0)
+      throw new Error('Assets list can not be empty');
+
+    const dataSource: IOfflinePoolServiceDataSource = {
+      assets: [],
+      pools: {
+        lbp: [],
+        xyk: [],
+        stableswap: [],
+        omni: [],
+        aave: [],
+      },
+    };
+
+    if (!persistentData.pools) return dataSource;
+
+    return {
+      assets: OfflinePoolUtils.decorateAssetsPersistentData(
+        persistentData.assets
+      ),
+      pools: {
+        lbp: (persistentData.pools.lbp || []).map(
+          OfflinePoolUtils.decorateLbpPoolPersistentData
+        ),
+        xyk: (persistentData.pools.xyk || []).map(
+          OfflinePoolUtils.decorateBasePoolPersistentData
+        ),
+        stableswap: (persistentData.pools.stableswap || []).map(
+          OfflinePoolUtils.decorateStableswapPersistentData
+        ),
+        omni: (persistentData.pools.omni || []).map(
+          OfflinePoolUtils.decorateOmniPoolPersistentData
+        ),
+        aave: (persistentData.pools.aave || []).map(
+          OfflinePoolUtils.decorateBasePoolPersistentData
+        ),
+      },
+    };
+  }
+
+  protected static getPoolDefaultPegs({
+    poolFee,
+    assets,
+  }: {
+    poolFee: number;
+    assets: Array<PersistentAsset | Asset>;
+  }): { pegsFee: PoolFee; pegs: string[][] } {
+    const defaultFee = poolFee;
+    const defaultPegs = StableMath.defaultPegs(assets.length);
+    return {
+      pegsFee: toPoolFee(defaultFee),
+      pegs: defaultPegs,
+    };
+  }
+
+  protected static decoratePoolType(src: string): PoolType {
+    if (!src) throw new Error('Pool type can not be empty');
+
+    switch (src) {
+      case 'aave':
+      case 'Aave':
+      case 'AAVE':
+        return PoolType.Aave;
+      case 'xyk':
+      case 'Xyk':
+      case 'XYK':
+        return PoolType.XYK;
+      case 'lbp':
+      case 'Lbp':
+      case 'LBP':
+        return PoolType.LBP;
+      case 'stable':
+      case 'Stable':
+      case 'STABLE':
+      case 'Stableswap':
+        return PoolType.Stable;
+      case 'omni':
+      case 'Omni':
+      case 'OMNI':
+      case 'Omnipool':
+        return PoolType.Omni;
+      default:
+        throw new Error(`Unknown pool type: ${src}`);
+    }
+  }
+
+  protected static decorateAssetsPersistentData(
+    src: PersistentAsset[] = []
+  ): Asset[] {
+    return src.map((pAsset) => {
+      const {
+        id,
+        decimals,
+        existentialDeposit,
+        type,
+        isSufficient,
+        symbol,
+        name,
+        icon,
+        location,
+      } = pAsset;
+      // TODO add values validation
+      return {
+        id,
+        decimals,
+        existentialDeposit,
+        type,
+        isSufficient,
+        location,
+        symbol: symbol ?? '',
+        name: name ?? '',
+        icon: icon ?? '',
+      };
+    });
+  }
+
+  protected static decorateBasePoolToken(src: IPersistentPoolToken): PoolToken {
+    if (!src) throw new Error('Pool token can not be empty');
+
+    const {
+      id,
+      decimals,
+      symbol,
+      balance,
+      tradeable,
+      tradable,
+      name,
+      existentialDeposit,
+      type,
+      isSufficient,
+      icon,
+      location,
+      isWhiteListed,
+    } = src;
+
+    // TODO add values validation
+
+    return {
+      id,
+      decimals,
+      symbol,
+      balance,
+      tradeable: tradeable ?? tradable,
+      name: name ?? '',
+      existentialDeposit,
+      type,
+      isSufficient,
+      icon: icon ?? '',
+      location,
+      isWhiteListed,
+    };
+  }
+
+  protected static decorateOmniPoolToken(
+    src: IPersistentOmniPoolToken
+  ): OmniPoolToken {
+    if (!src) throw new Error('Pool token can not be empty');
+
+    const {
+      id,
+      decimals,
+      symbol,
+      balance,
+      tradable,
+      hubReserves,
+      shares,
+      cap,
+      protocolShares,
+      name,
+      existentialDeposit,
+      type,
+      isSufficient,
+      icon,
+      location,
+      isWhiteListed,
+    } = src;
+
+    // TODO add values validation
+
+    return {
+      tradeable: tradable,
+      hubReserves: BigNumber(hubReserves),
+      shares: BigNumber(shares),
+      cap: BigNumber(cap),
+      protocolShares: BigNumber(protocolShares),
+      id,
+      decimals,
+      symbol,
+      balance,
+      name: name ?? '',
+      existentialDeposit,
+      type,
+      isSufficient,
+      icon: icon ?? '',
+      location,
+      isWhiteListed,
+    };
+  }
+
+  protected static decorateBasePoolPersistentData(
+    src: IPersistentPoolBase
+  ): PoolBase {
+    if (!src) throw new Error('Pool can not be empty');
+
+    const {
+      address,
+      id,
+      type,
+      tokens,
+      maxInRatio,
+      maxOutRatio,
+      minTradingLimit,
+    } = src;
+
+    // TODO add values validation
+
+    return {
+      id,
+      address,
+      type: OfflinePoolUtils.decoratePoolType(type),
+      tokens: tokens.map(OfflinePoolUtils.decorateBasePoolToken),
+      maxInRatio,
+      maxOutRatio,
+      minTradingLimit,
+    };
+  }
+
+  protected static decorateLbpPoolPersistentData(
+    src: IPersistentLbpPoolBase
+  ): LbpPoolBase {
+    if (!src) throw new Error('Pool can not be empty');
+
+    const basePoolData = OfflinePoolUtils.decorateBasePoolPersistentData(src);
+
+    // TODO check for active pool https://github.com/mckrava/hydration-sdk/blob/9f061a0680c9732216c82a2ea7e6bb7cbac5fba4/packages/sdk/src/pool/lbp/LbpPoolClient.ts#L34
+
+    const {
+      start,
+      end,
+      tokens,
+      initialWeight,
+      finalWeight,
+      repayTarget,
+      feeCollector,
+      relayBlockNumber,
+    } = src;
+
+    const lbpPoolData: LbpPoolBase = {
+      ...basePoolData,
+      fee: src.fee as PoolFee,
+      repayFeeApply: src.repayFeeApply, //TODO check implementation https://github.com/mckrava/hydration-sdk/blob/9f061a0680c9732216c82a2ea7e6bb7cbac5fba4/packages/sdk/src/pool/lbp/LbpPoolClient.ts#L137
+    };
+
+    const linearWeight = LbpMath.calculateLinearWeights(
+      start.toString(),
+      end.toString(),
+      initialWeight.toString(),
+      finalWeight.toString(),
+      relayBlockNumber.toString()
+    );
+
+    const [accumulated, distributed] = tokens;
+    const accumulatedAsset = accumulated.id.toString();
+    const accumulatedWeight = bnum(linearWeight);
+    const distributedAsset = distributed.id.toString();
+    const distributedWeight = this.MAX_FINAL_WEIGHT.minus(
+      bnum(accumulatedWeight)
+    );
+
+    lbpPoolData.tokens = [
+      {
+        id: accumulatedAsset,
+        weight: accumulatedWeight,
+        balance: accumulated.balance.toString(),
+      } as WeightedPoolToken,
+      {
+        id: distributedAsset,
+        weight: distributedWeight,
+        balance: distributed.balance.toString(),
+      } as WeightedPoolToken,
+    ];
+
+    return lbpPoolData;
+  }
+
+  protected static decorateStableswapPersistentData(
+    src: IPersistentStableSwapBase
+  ): StableSwapBase {
+    if (!src) throw new Error('Pool can not be empty');
+
+    const { address, type, tokens, maxInRatio, maxOutRatio, minTradingLimit } =
+      OfflinePoolUtils.decorateBasePoolPersistentData(src);
+
+    const {
+      id,
+      initialAmplification,
+      finalAmplification,
+      initialBlock,
+      finalBlock,
+      blockNumber,
+      fee,
+      totalIssuance,
+    } = src;
+
+    const amplification = StableMath.calculateAmplification(
+      initialAmplification.toString(),
+      finalAmplification.toString(),
+      initialBlock.toString(),
+      finalBlock.toString(),
+      blockNumber.toString()
+    );
+
+    const stableSwapData: StableSwapBase = {
+      id,
+      address,
+      type,
+      fee: toPoolFee(src.fee),
+      maxInRatio,
+      maxOutRatio,
+      minTradingLimit,
+      amplification,
+      totalIssuance,
+      tokens,
+      ...OfflinePoolUtils.getPoolDefaultPegs({
+        poolFee: fee,
+        assets: tokens,
+      }),
+    };
+
+    return stableSwapData;
+  }
+
+  protected static decorateOmniPoolPersistentData(
+    src: IPersistentOmniPoolBase
+  ): OmniPoolBase {
+    if (!src) throw new Error('Pool can not be empty');
+
+    const { tokens, hubAssetId } = src;
+
+    const basePoolData = OfflinePoolUtils.decorateBasePoolPersistentData(src);
+
+    const omniPoolData: OmniPoolBase = {
+      ...basePoolData,
+      hubAssetId,
+      tokens: tokens.map(OfflinePoolUtils.decorateOmniPoolToken),
+    };
+
+    return omniPoolData;
+  }
+}

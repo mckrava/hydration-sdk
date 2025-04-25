@@ -11,7 +11,8 @@ export {
   IPersistentOmniPoolBase,
   IPersistentOmniPoolToken,
   PersistentAsset,
-} from './OfflinePoolService';
+} from './offlinePoolService/OfflinePoolService';
+export { OfflinePoolUtils } from './offlinePoolService/OfflinePoolUtils';
 export * from './PoolUtils';
 export { AavePool } from './aave/AavePool';
 export { XykPool } from './xyk/XykPool';

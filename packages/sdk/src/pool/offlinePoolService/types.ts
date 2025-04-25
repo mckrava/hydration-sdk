@@ -1,0 +1,209 @@
+import { Asset, PoolBase, PoolToken, PoolType } from '../../types';
+import { LbpPoolBase } from '../lbp/LbpPool';
+import { StableSwapBase } from '../stable/StableSwap';
+import { OmniPoolBase } from '../omni/OmniPool';
+
+export enum AssetType {
+  Bond = 'Bond',
+  External = 'External',
+  StableSwap = 'StableSwap',
+  Token = 'Token',
+  XYK = 'XYK',
+  Erc20 = 'Erc20',
+  PoolShare = 'PoolShare',
+}
+
+export type AssetDynamicFee = {
+  assetFee: number;
+  protocolFee: number;
+  timestamp: number;
+};
+
+export interface PersistentAsset extends Partial<Asset> {
+  id: string;
+  decimals: number;
+  symbol: string;
+  existentialDeposit: string;
+  isSufficient: boolean;
+  type: AssetType;
+  dynamicFee: AssetDynamicFee;
+}
+
+export interface IPersistentPoolToken extends Partial<PoolToken> {
+  id: string;
+  decimals: number;
+  symbol: string;
+  balance: string;
+  existentialDeposit: string;
+  isSufficient: boolean;
+  type: AssetType;
+  tradable?: number;
+}
+
+export interface IPersistentOmniPoolToken extends PersistentAsset {
+  id: string;
+  decimals: number;
+  balance: string;
+  tradable?: number;
+  hubReserves: string;
+  shares: string;
+  cap: string;
+  protocolShares: string;
+}
+
+export interface IPersistentPoolBase {
+  address: string;
+  id?: string;
+  type: PoolType;
+  tokens: IPersistentPoolToken[];
+  maxInRatio: number;
+  maxOutRatio: number;
+  minTradingLimit: number;
+}
+
+export interface IPersistentLbpPoolBase {
+  id?: string;
+  address: string;
+  type: PoolType;
+  tokens: IPersistentPoolToken[];
+  maxInRatio: number;
+  maxOutRatio: number;
+  minTradingLimit: number;
+  fee: number[];
+  repayFeeApply: boolean;
+  start: number;
+  end: number;
+  initialWeight: number;
+  finalWeight: number;
+  repayTarget: string;
+  feeCollector: string;
+  relayBlockNumber: number;
+}
+
+export interface IPersistentStableSwapBase {
+  id: string;
+  address: string;
+  type: PoolType;
+  tokens: IPersistentPoolToken[];
+  maxInRatio: number;
+  maxOutRatio: number;
+  minTradingLimit: number;
+  initialAmplification: number;
+  finalAmplification: number;
+  initialBlock: number;
+  finalBlock: number;
+  blockNumber: number;
+  fee: number;
+  totalIssuance: string;
+}
+
+export interface IPersistentOmniPoolBase {
+  address: string;
+  type: PoolType;
+  tokens: IPersistentOmniPoolToken[];
+  maxInRatio: number;
+  maxOutRatio: number;
+  minTradingLimit: number;
+  hubAssetId: string;
+}
+
+export type PersistentDynamicFeesAssetFeeParams = {
+  minFee: number;
+  maxFee: number;
+  decay: string;
+  amplification: string;
+};
+
+export interface IPersistentConstants {
+  lbpRepayFee: number[];
+  lbpMaxInRatio: string;
+  lbpMaxOutRatio: string;
+  lbpMinPoolLiquidity: string;
+  lbpMinTradingLimit: string;
+
+  omnipoolBurnProtocolFee: number;
+  omnipoolHdxAssetId: number;
+  omnipoolHubAssetId: number;
+  omnipoolMaxInRatio: string;
+  omnipoolMaxOutRatio: string;
+  omnipoolMinimumPoolLiquidity: string;
+  omnipoolMinimumTradingLimit: string;
+  omnipoolMinWithdrawalFee: number;
+
+  stableswapMinTradingLimit: string;
+  stableswapMinPoolLiquidity: string;
+  stableswapAmplificationRange: number[];
+
+  xykGetExchangeFee: number[];
+  xykMaxInRatio: string;
+  xykMaxOutRatio: string;
+  xykMinPoolLiquidity: string;
+  xykMinTradingLimit: string;
+  xykNativeAssetId: number;
+  xykOracleSource: string;
+
+  dynamicFeesAssetFeeParameters: PersistentDynamicFeesAssetFeeParams;
+  dynamicFeesProtocolFeeParameters: PersistentDynamicFeesAssetFeeParams;
+}
+
+export interface IPersistentEmaOracleAssetEntry {
+  assetId: number;
+  entry: IPersistentEmaOracleEntry;
+}
+export interface IPersistentEmaOracleEntry {
+  price: IPersistentEmaOracleEntryRatio;
+  volume: IPersistentEmaOracleEntryVolume;
+  liquidity: IPersistentEmaOracleEntryLiquidity;
+  updatedAt: number;
+}
+
+export interface IPersistentEmaOracleEntryLiquidity {
+  a: string;
+  b: string;
+}
+
+export interface IPersistentEmaOracleEntryVolume {
+  aIn: string;
+  bOut: string;
+  aOut: string;
+  bIn: string;
+}
+
+export interface IPersistentEmaOracleEntryRatio {
+  n: string;
+  d: string;
+}
+
+export interface IPersistentDataInput {
+  assets: Array<PersistentAsset>;
+  pools: {
+    lbp: Array<IPersistentLbpPoolBase>;
+    xyk: Array<IPersistentPoolBase>;
+    stableswap: Array<IPersistentStableSwapBase>;
+    omni: Array<IPersistentOmniPoolBase>;
+    aave: Array<IPersistentPoolBase>;
+  };
+  constants: IPersistentConstants;
+  emaOracle: Record<PoolType, Array<IPersistentEmaOracleAssetEntry>>;
+  meta: IPersistentMetaData;
+}
+
+export interface IOfflinePoolServiceDataSource {
+  assets: Array<PersistentAsset>;
+  pools: {
+    lbp: Array<LbpPoolBase>;
+    xyk: Array<PoolBase>;
+    stableswap: Array<StableSwapBase>;
+    omni: Array<OmniPoolBase>;
+    aave: Array<PoolBase>;
+  };
+  constants: IPersistentConstants;
+  emaOracle: Record<PoolType, Array<IPersistentEmaOracleAssetEntry>>;
+  meta: IPersistentMetaData;
+}
+
+export interface IPersistentMetaData {
+  paraBlockNumber: number;
+  paraBlockHash: string;
+  relayBlockNumber: number;
+}
