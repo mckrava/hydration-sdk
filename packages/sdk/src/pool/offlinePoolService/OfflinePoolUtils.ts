@@ -1,8 +1,11 @@
 import { BigNumber, bnum, scale } from '../../utils/bignumber';
 import {
   IOfflinePoolServiceDataSource,
+  IPersistentConstants,
   IPersistentDataInput,
+  IPersistentEmaOracleAssetEntry,
   IPersistentLbpPoolBase,
+  IPersistentMetaData,
   IPersistentOmniPoolBase,
   IPersistentOmniPoolToken,
   IPersistentPoolBase,
@@ -27,18 +30,12 @@ export class OfflinePoolUtils {
     if (!persistentData.assets || persistentData.assets.length == 0)
       throw new Error('Assets list can not be empty');
 
-    const dataSource: IOfflinePoolServiceDataSource = {
-      assets: [],
-      pools: {
-        lbp: [],
-        xyk: [],
-        stableswap: [],
-        omni: [],
-        aave: [],
-      },
-    };
-
-    if (!persistentData.pools) return dataSource;
+    if (!persistentData.constants)
+      throw new Error('Constants must be provided');
+    if (!persistentData.meta)
+      throw new Error('Datasource metadata must be provided');
+    if (!persistentData.emaOracle)
+      throw new Error('EmaOracle data must be provided');
 
     return {
       assets: OfflinePoolUtils.decorateAssetsPersistentData(
@@ -61,6 +58,9 @@ export class OfflinePoolUtils {
           OfflinePoolUtils.decorateBasePoolPersistentData
         ),
       },
+      constants: persistentData.constants,
+      emaOracle: persistentData.emaOracle,
+      meta: persistentData.meta,
     };
   }
 
@@ -112,7 +112,7 @@ export class OfflinePoolUtils {
 
   protected static decorateAssetsPersistentData(
     src: PersistentAsset[] = []
-  ): Asset[] {
+  ): PersistentAsset[] {
     return src.map((pAsset) => {
       const {
         id,
@@ -124,6 +124,7 @@ export class OfflinePoolUtils {
         name,
         icon,
         location,
+        dynamicFee,
       } = pAsset;
       // TODO add values validation
       return {
@@ -133,10 +134,11 @@ export class OfflinePoolUtils {
         type,
         isSufficient,
         location,
+        dynamicFee,
         symbol: symbol ?? '',
         name: name ?? '',
         icon: icon ?? '',
-      };
+      } as PersistentAsset;
     });
   }
 
