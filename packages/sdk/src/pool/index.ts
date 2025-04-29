@@ -1,18 +1,7 @@
 export { CachingPoolService } from './CachingPoolService';
 export { PoolFactory } from './PoolFactory';
 export { PoolService } from './PoolService';
-export {
-  OfflinePoolService,
-  IPersistentDataInput,
-  IPersistentPoolBase,
-  IPersistentPoolToken,
-  IPersistentLbpPoolBase,
-  IPersistentStableSwapBase,
-  IPersistentOmniPoolBase,
-  IPersistentOmniPoolToken,
-  PersistentAsset,
-} from './offlinePoolService/OfflinePoolService';
-export { OfflinePoolUtils } from './offlinePoolService/OfflinePoolUtils';
+export * from './offlinePoolService';
 export * from './PoolUtils';
 export { AavePool } from './aave/AavePool';
 export { XykPool } from './xyk/XykPool';

@@ -1,10 +1,12 @@
 import { Asset, PoolBase, PoolFees, PoolPair, PoolType } from '../../../types';
 import {
   AssetDynamicFee,
+  EmaOraclePeriod,
+  EmaOracleSource,
   IOfflinePoolServiceDataSource,
   IPersistentConstants,
-  IPersistentEmaOracleAssetEntry,
   IPersistentEmaOracleEntry,
+  IPersistentEmaOracleEntryData,
   IPersistentMetaData,
   PersistentAsset,
 } from '../types';
@@ -14,8 +16,8 @@ export abstract class OfflinePoolClient {
   private assets: Map<string, PersistentAsset> = new Map([]);
   protected constants: IPersistentConstants;
   protected emaOracleEntries: Map<
-    PoolType,
-    Map<string, IPersistentEmaOracleEntry>
+    EmaOracleSource,
+    Map<EmaOraclePeriod, Map<string, IPersistentEmaOracleEntryData>>
   > = new Map([]);
   protected dataSourceMeta: IPersistentMetaData;
 
@@ -32,17 +34,22 @@ export abstract class OfflinePoolClient {
     this.constants = dataSource.constants;
     this.dataSourceMeta = dataSource.meta;
 
-    for (const poolType in dataSource.emaOracle) {
-      this.emaOracleEntries.set(
-        poolType as PoolType,
-        new Map(
-          (
-            dataSource.emaOracle[
-              poolType as PoolType
-            ] as Array<IPersistentEmaOracleAssetEntry>
-          ).map((i) => [`${i.assetId}`, i.entry])
-        )
-      );
+    for (const oracleEntry of dataSource.emaOracle) {
+      if (!this.emaOracleEntries.has(oracleEntry.source)) {
+        this.emaOracleEntries.set(oracleEntry.source, new Map());
+      }
+      if (
+        !this.emaOracleEntries.get(oracleEntry.source)!.has(oracleEntry.period)
+      ) {
+        this.emaOracleEntries
+          .get(oracleEntry.source)!
+          .set(oracleEntry.period, new Map());
+      }
+
+      this.emaOracleEntries
+        .get(oracleEntry.source)!
+        .get(oracleEntry.period)!
+        .set(oracleEntry.assets.join('-'), oracleEntry.entry);
     }
   }
 
@@ -78,7 +85,7 @@ export abstract class OfflinePoolClient {
     );
   }
 
-  protected getAssetDynamicFee(assetId: string): AssetDynamicFee {
+  protected getAssetDynamicFee(assetId: string): AssetDynamicFee | undefined {
     if (!this.assets.has(assetId))
       throw Error('Asset not found: ' + assetId + '');
     return this.assets.get(assetId)!.dynamicFee;

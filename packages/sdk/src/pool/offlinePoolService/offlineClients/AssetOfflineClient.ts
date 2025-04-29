@@ -1,6 +1,4 @@
-import { Asset } from '../../../types';
 import {
-  AssetDynamicFee,
   IOfflinePoolServiceDataSource,
   PersistentAsset,
 } from '../types';

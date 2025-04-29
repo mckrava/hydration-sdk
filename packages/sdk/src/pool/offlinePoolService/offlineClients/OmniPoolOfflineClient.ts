@@ -1,18 +1,13 @@
 import { OfflinePoolClient } from './OfflinePoolClient';
 import {
   AssetDynamicFee,
+  EmaOraclePeriod,
+  EmaOracleSource,
   IOfflinePoolServiceDataSource,
-  IPersistentEmaOracleAssetEntry,
-  IPersistentEmaOracleEntry,
+  IPersistentEmaOracleEntryData,
 } from '../types';
-import { PoolFees, PoolPair, PoolType } from 'types';
+import { PoolFees, PoolPair, PoolType } from '../../../types';
 import { HUB_ASSET_ID, SYSTEM_ASSET_ID } from '../../../consts';
-import { Option, u32 } from '@polkadot/types-codec';
-import { ITuple } from '@polkadot/types-codec/types';
-import type {
-  PalletDynamicFeesFeeEntry,
-  PalletEmaOracleOracleEntry,
-} from '@polkadot/types/lookup';
 import { toPct, toPoolFee } from '../../../utils/mapper';
 import { OmniPoolFees } from '../../omni/OmniPool';
 import { OmniMath } from '../../omni/OmniMath';
@@ -36,19 +31,32 @@ export class OmniPoolOfflineClient extends OfflinePoolClient {
     const feeAsset = poolPair.assetOut;
     const protocolAsset = poolPair.assetIn;
 
-    // const oracleName = 'omnipool';
-    // const oraclePeriod = 'Short';
-    //
-    // const oracleKey = (asset: string) => {
-    //   return asset === SYSTEM_ASSET_ID
-    //     ? [SYSTEM_ASSET_ID, HUB_ASSET_ID]
-    //     : [HUB_ASSET_ID, asset];
-    // };
+    const oracleName = 'omnipool';
+    const oraclePeriod = 'Short';
+
+    const oracleKey = (asset: string) => {
+      return (
+        asset === SYSTEM_ASSET_ID
+          ? [SYSTEM_ASSET_ID, HUB_ASSET_ID]
+          : [HUB_ASSET_ID, asset]
+      ).join('-');
+    };
+
+    const dynamicFees = this.getAssetDynamicFee(feeAsset);
+
+    if (!dynamicFees) throw Error('Dynamic fees not found for pool type Omni');
 
     const blockNumber = this.dataSourceMeta.paraBlockNumber;
-    const dynamicFees = this.getAssetDynamicFee(feeAsset);
-    const oracleAssetFee = this.getAssetEmaOracleEntry(feeAsset);
-    const oracleProtocolFee = this.getAssetEmaOracleEntry(protocolAsset);
+    const oracleAssetFee = this.getAssetEmaOracleEntry(
+      oracleName,
+      oraclePeriod,
+      oracleKey(feeAsset)
+    );
+    const oracleProtocolFee = this.getAssetEmaOracleEntry(
+      oracleName,
+      oraclePeriod,
+      oracleKey(protocolAsset)
+    );
 
     // const [blockNumber, dynamicFees, oracleAssetFee, oracleProtocolFee] =
     //   await Promise.all([
@@ -90,22 +98,35 @@ export class OmniPoolOfflineClient extends OfflinePoolClient {
     } as OmniPoolFees;
   }
 
-  protected getAssetEmaOracleEntry(assetId: string): IPersistentEmaOracleEntry {
-    if (!this.emaOracleEntries.has(PoolType.Omni))
-      throw Error('EmaOracle entries not found for pool type Omni');
+  /**
+   * @param entryKey - <asset_a_id>-<asset_b_id>
+   */
+  protected getAssetEmaOracleEntry(
+    source: EmaOracleSource,
+    period: EmaOraclePeriod,
+    entryKey: string
+  ): IPersistentEmaOracleEntryData {
+    if (!this.emaOracleEntries.has(source))
+      throw Error(`EmaOracle entries not found for pool type ${source}`);
 
-    if (!this.emaOracleEntries.get(PoolType.Omni)!.has(assetId))
+    if (!this.emaOracleEntries.get(source)!.has(period))
       throw Error(
-        `EmaOracle entries not found for pool type Omni and assetId ${assetId}`
+        `EmaOracle entries not found for pool type ${source} and period ${period}`
       );
-    return this.emaOracleEntries.get(PoolType.Omni)!.get(assetId)!;
+
+    if (!this.emaOracleEntries.get(source)!.get(period)!.has(entryKey))
+      throw Error(
+        `EmaOracle entries not found for pool type ${source}, period ${period}, entry key ${entryKey}`
+      );
+
+    return this.emaOracleEntries.get(source)!.get(period)!.get(entryKey)!;
   }
 
   private getAssetFee(
     poolPair: PoolPair,
     blockNumber: number,
     dynamicFee: AssetDynamicFee,
-    oracleEntry: IPersistentEmaOracleEntry
+    oracleEntry: IPersistentEmaOracleEntryData
   ): OmniPoolFeeRange {
     const { assetOut, balanceOut } = poolPair;
 
@@ -154,7 +175,7 @@ export class OmniPoolOfflineClient extends OfflinePoolClient {
     poolPair: PoolPair,
     blockNumber: number,
     dynamicFee: AssetDynamicFee,
-    oracleEntry: IPersistentEmaOracleEntry
+    oracleEntry: IPersistentEmaOracleEntryData
   ): OmniPoolFeeRange {
     const { assetIn, balanceIn } = poolPair;
 

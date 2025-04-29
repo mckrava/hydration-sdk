@@ -1,6 +1,6 @@
 import { OfflinePoolClient } from './OfflinePoolClient';
 import { IOfflinePoolServiceDataSource } from '../types';
-import { PoolFees, PoolPair, PoolType } from 'types';
+import { PoolFees, PoolPair, PoolType } from '../../../types';
 
 export class AavePoolOfflineClient extends OfflinePoolClient {
   constructor(dataSource: IOfflinePoolServiceDataSource) {

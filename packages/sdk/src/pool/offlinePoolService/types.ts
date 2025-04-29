@@ -26,7 +26,7 @@ export interface PersistentAsset extends Partial<Asset> {
   existentialDeposit: string;
   isSufficient: boolean;
   type: AssetType;
-  dynamicFee: AssetDynamicFee;
+  dynamicFee?: AssetDynamicFee;
 }
 
 export interface IPersistentPoolToken extends Partial<PoolToken> {
@@ -146,11 +146,17 @@ export interface IPersistentConstants {
   dynamicFeesProtocolFeeParameters: PersistentDynamicFeesAssetFeeParams;
 }
 
-export interface IPersistentEmaOracleAssetEntry {
-  assetId: number;
-  entry: IPersistentEmaOracleEntry;
-}
+export type EmaOracleSource = string;
+
+export type EmaOraclePeriod = string;
+
 export interface IPersistentEmaOracleEntry {
+  source: EmaOracleSource;
+  period: EmaOraclePeriod;
+  assets: string[];
+  entry: IPersistentEmaOracleEntryData;
+}
+export interface IPersistentEmaOracleEntryData {
   price: IPersistentEmaOracleEntryRatio;
   volume: IPersistentEmaOracleEntryVolume;
   liquidity: IPersistentEmaOracleEntryLiquidity;
@@ -180,11 +186,11 @@ export interface IPersistentDataInput {
     lbp: Array<IPersistentLbpPoolBase>;
     xyk: Array<IPersistentPoolBase>;
     stableswap: Array<IPersistentStableSwapBase>;
-    omni: Array<IPersistentOmniPoolBase>;
+    omnipool: Array<IPersistentOmniPoolBase>;
     aave: Array<IPersistentPoolBase>;
   };
   constants: IPersistentConstants;
-  emaOracle: Record<PoolType, Array<IPersistentEmaOracleAssetEntry>>;
+  emaOracle: Array<IPersistentEmaOracleEntry>;
   meta: IPersistentMetaData;
 }
 
@@ -194,11 +200,11 @@ export interface IOfflinePoolServiceDataSource {
     lbp: Array<LbpPoolBase>;
     xyk: Array<PoolBase>;
     stableswap: Array<StableSwapBase>;
-    omni: Array<OmniPoolBase>;
+    omnipool: Array<OmniPoolBase>;
     aave: Array<PoolBase>;
   };
   constants: IPersistentConstants;
-  emaOracle: Record<PoolType, Array<IPersistentEmaOracleAssetEntry>>;
+  emaOracle: Array<IPersistentEmaOracleEntry>;
   meta: IPersistentMetaData;
 }
 

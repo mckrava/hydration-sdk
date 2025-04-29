@@ -23,6 +23,8 @@ import { StablePoolOfflineClient } from './offlineClients/StablePoolOfflineClien
 import { OfflinePoolClient } from './offlineClients/OfflinePoolClient';
 import { AssetOfflineClient } from './offlineClients/AssetOfflineClient';
 
+// export * from './types';
+
 export class OfflinePoolService implements IPoolService {
   protected readonly assetOfflineClient: AssetOfflineClient;
 

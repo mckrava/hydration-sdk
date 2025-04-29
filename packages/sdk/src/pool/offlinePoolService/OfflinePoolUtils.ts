@@ -3,7 +3,7 @@ import {
   IOfflinePoolServiceDataSource,
   IPersistentConstants,
   IPersistentDataInput,
-  IPersistentEmaOracleAssetEntry,
+  IPersistentEmaOracleEntry,
   IPersistentLbpPoolBase,
   IPersistentMetaData,
   IPersistentOmniPoolBase,
@@ -51,7 +51,7 @@ export class OfflinePoolUtils {
         stableswap: (persistentData.pools.stableswap || []).map(
           OfflinePoolUtils.decorateStableswapPersistentData
         ),
-        omni: (persistentData.pools.omni || []).map(
+        omnipool: (persistentData.pools.omnipool || []).map(
           OfflinePoolUtils.decorateOmniPoolPersistentData
         ),
         aave: (persistentData.pools.aave || []).map(
