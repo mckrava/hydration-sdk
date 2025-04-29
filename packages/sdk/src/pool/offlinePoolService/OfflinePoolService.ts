@@ -22,6 +22,8 @@ import { XykPoolOfflineClient } from './offlineClients/XykPoolOfflineClient';
 import { StablePoolOfflineClient } from './offlineClients/StablePoolOfflineClient';
 import { OfflinePoolClient } from './offlineClients/OfflinePoolClient';
 import { AssetOfflineClient } from './offlineClients/AssetOfflineClient';
+import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
+import { buildRoute } from '../PoolUtils';
 
 // export * from './types';
 
@@ -133,6 +135,17 @@ export class OfflinePoolService implements IPoolService {
     assetIn: string,
     assetOut: string,
     amountIn: BigNumber,
+    minAmountOut: BigNumber,
+    route: Hop[]
+  ): Transaction {
+    throw Error(
+      'Method is not allowed for OfflinePoolService. Use PoolService instead.'
+    );
+  }
+
+  buildSellAllTx(
+    assetIn: string,
+    assetOut: string,
     minAmountOut: BigNumber,
     route: Hop[]
   ): Transaction {
