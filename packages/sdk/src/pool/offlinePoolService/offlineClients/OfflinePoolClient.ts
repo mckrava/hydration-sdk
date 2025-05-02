@@ -10,6 +10,7 @@ import {
   IPersistentMetaData,
   PersistentAsset,
 } from '../types';
+import { OfflinePoolUtils } from '../utils/OfflinePoolUtils';
 
 export abstract class OfflinePoolClient {
   protected pools: PoolBase[] = [];
@@ -33,24 +34,9 @@ export abstract class OfflinePoolClient {
       dataSource.pools[poolType.toLowerCase() as keyof typeof dataSource.pools];
     this.constants = dataSource.constants;
     this.dataSourceMeta = dataSource.meta;
-
-    for (const oracleEntry of dataSource.emaOracle) {
-      if (!this.emaOracleEntries.has(oracleEntry.source)) {
-        this.emaOracleEntries.set(oracleEntry.source, new Map());
-      }
-      if (
-        !this.emaOracleEntries.get(oracleEntry.source)!.has(oracleEntry.period)
-      ) {
-        this.emaOracleEntries
-          .get(oracleEntry.source)!
-          .set(oracleEntry.period, new Map());
-      }
-
-      this.emaOracleEntries
-        .get(oracleEntry.source)!
-        .get(oracleEntry.period)!
-        .set(oracleEntry.assets.join('-'), oracleEntry.entry);
-    }
+    this.emaOracleEntries = OfflinePoolUtils.decorateEmaOraclesPersistentData(
+      dataSource.emaOracle
+    );
   }
 
   get augmentedPools() {
@@ -66,7 +52,7 @@ export abstract class OfflinePoolClient {
    */
   private isValidPool(pool: PoolBase): boolean {
     return pool.type === PoolType.XYK
-      ? pool.tokens.every((t) => this.assets.get(t.id))
+      ? pool.tokens.every((t) => this.assets.has(t.id))
       : true;
   }
 

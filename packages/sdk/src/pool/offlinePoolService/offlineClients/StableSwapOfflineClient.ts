@@ -3,7 +3,7 @@ import { IOfflinePoolServiceDataSource } from '../types';
 import { PoolFee, PoolFees, PoolPair, PoolType } from '../../../types';
 import { StableSwapBase, StableSwapFees } from '../../stable/StableSwap';
 
-export class StablePoolOfflineClient extends OfflinePoolClient {
+export class StableSwapOfflineClient extends OfflinePoolClient {
   constructor(dataSource: IOfflinePoolServiceDataSource) {
     super(dataSource, PoolType.Stable);
   }

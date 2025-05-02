@@ -1,5 +1,5 @@
 export { OfflinePoolService } from './OfflinePoolService';
-export { OfflinePoolUtils } from './OfflinePoolUtils';
+export { OfflinePoolUtils } from './utils/OfflinePoolUtils';
 export {
   IPersistentDataInput,
   IPersistentPoolBase,

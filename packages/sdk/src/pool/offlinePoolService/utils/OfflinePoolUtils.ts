@@ -1,9 +1,12 @@
-import { BigNumber, bnum, scale } from '../../utils/bignumber';
+import { BigNumber, bnum, scale } from '../../../utils/bignumber';
 import {
+  EmaOraclePeriod,
+  EmaOracleSource,
   IOfflinePoolServiceDataSource,
   IPersistentConstants,
   IPersistentDataInput,
   IPersistentEmaOracleEntry,
+  IPersistentEmaOracleEntryData,
   IPersistentLbpPoolBase,
   IPersistentMetaData,
   IPersistentOmniPoolBase,
@@ -12,14 +15,15 @@ import {
   IPersistentPoolToken,
   IPersistentStableSwapBase,
   PersistentAsset,
-} from './types';
-import { Asset, PoolBase, PoolFee, PoolToken, PoolType } from '../../types';
-import { StableMath } from '../stable/StableMath';
-import { toPoolFee } from '../../utils/mapper';
-import { OmniPoolBase, OmniPoolToken } from '../omni/OmniPool';
-import { LbpPoolBase, WeightedPoolToken } from '../lbp/LbpPool';
-import { LbpMath } from '../lbp/LbpMath';
-import { StableSwapBase } from '../stable/StableSwap';
+} from '../types';
+import { Asset, PoolBase, PoolFee, PoolToken, PoolType } from '../../../types';
+import { StableMath } from '../../stable/StableMath';
+import { toPoolFee } from '../../../utils/mapper';
+import { OmniPoolBase, OmniPoolToken } from '../../omni/OmniPool';
+import { LbpPoolBase, WeightedPoolToken } from '../../lbp/LbpPool';
+import { LbpMath } from '../../lbp/LbpMath';
+import { StableSwapBase } from '../../stable/StableSwap';
+import { StableSwapOfflineUtils } from './StableSwapOfflineUtils';
 
 export class OfflinePoolUtils {
   private static readonly MAX_FINAL_WEIGHT = scale(bnum(100), 6);
@@ -48,8 +52,13 @@ export class OfflinePoolUtils {
         xyk: (persistentData.pools.xyk || []).map(
           OfflinePoolUtils.decorateBasePoolPersistentData
         ),
-        stableswap: (persistentData.pools.stableswap || []).map(
-          OfflinePoolUtils.decorateStableswapPersistentData
+        stableswap: (persistentData.pools.stableswap || []).map((pool) =>
+          OfflinePoolUtils.decorateStableswapPersistentData({
+            src: pool,
+            assets: persistentData.assets,
+            emaOraclesData: persistentData.emaOracle,
+            metaData: persistentData.meta,
+          })
         ),
         omnipool: (persistentData.pools.omnipool || []).map(
           OfflinePoolUtils.decorateOmniPoolPersistentData
@@ -64,19 +73,31 @@ export class OfflinePoolUtils {
     };
   }
 
-  protected static getPoolDefaultPegs({
-    poolFee,
-    assets,
-  }: {
-    poolFee: number;
-    assets: Array<PersistentAsset | Asset>;
-  }): { pegsFee: PoolFee; pegs: string[][] } {
-    const defaultFee = poolFee;
-    const defaultPegs = StableMath.defaultPegs(assets.length);
-    return {
-      pegsFee: toPoolFee(defaultFee),
-      pegs: defaultPegs,
-    };
+  static decorateEmaOraclesPersistentData(
+    src: Array<IPersistentEmaOracleEntry>
+  ): Map<
+    EmaOracleSource,
+    Map<EmaOraclePeriod, Map<string, IPersistentEmaOracleEntryData>>
+  > {
+    const emaOracleEntries = new Map();
+
+    for (const oracleEntry of src) {
+      if (!emaOracleEntries.has(oracleEntry.source)) {
+        emaOracleEntries.set(oracleEntry.source, new Map());
+      }
+      if (!emaOracleEntries.get(oracleEntry.source)!.has(oracleEntry.period)) {
+        emaOracleEntries
+          .get(oracleEntry.source)!
+          .set(oracleEntry.period, new Map());
+      }
+
+      emaOracleEntries
+        .get(oracleEntry.source)!
+        .get(oracleEntry.period)!
+        .set(oracleEntry.assets.join('-'), oracleEntry.entry);
+    }
+
+    return emaOracleEntries;
   }
 
   protected static decoratePoolType(src: string): PoolType {
@@ -142,7 +163,7 @@ export class OfflinePoolUtils {
     });
   }
 
-  protected static decorateBasePoolToken(src: IPersistentPoolToken): PoolToken {
+  static decorateBasePoolToken(src: IPersistentPoolToken): PoolToken {
     if (!src) throw new Error('Pool token can not be empty');
 
     const {
@@ -311,9 +332,17 @@ export class OfflinePoolUtils {
     return lbpPoolData;
   }
 
-  protected static decorateStableswapPersistentData(
-    src: IPersistentStableSwapBase
-  ): StableSwapBase {
+  protected static decorateStableswapPersistentData({
+    src,
+    assets,
+    emaOraclesData,
+    metaData,
+  }: {
+    src: IPersistentStableSwapBase;
+    assets: Array<PersistentAsset>;
+    emaOraclesData: IPersistentEmaOracleEntry[];
+    metaData: IPersistentMetaData;
+  }): StableSwapBase {
     if (!src) throw new Error('Pool can not be empty');
 
     const { address, type, tokens, maxInRatio, maxOutRatio, minTradingLimit } =
@@ -342,16 +371,21 @@ export class OfflinePoolUtils {
       id,
       address,
       type,
-      fee: toPoolFee(src.fee),
+      fee: toPoolFee(fee),
       maxInRatio,
       maxOutRatio,
       minTradingLimit,
       amplification,
       totalIssuance,
-      tokens,
-      ...OfflinePoolUtils.getPoolDefaultPegs({
-        poolFee: fee,
-        assets: tokens,
+      tokens: StableSwapOfflineUtils.getPoolTokensAugmented({
+        poolId: src.id,
+        poolTokens: tokens,
+        assets,
+      }),
+      ...StableSwapOfflineUtils.getStableswapPegsFromPersistentData({
+        src,
+        emaOraclesData,
+        metaData,
       }),
     };
 

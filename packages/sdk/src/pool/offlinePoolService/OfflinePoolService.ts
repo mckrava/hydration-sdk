@@ -19,7 +19,7 @@ import { OmniPoolOfflineClient } from './offlineClients/OmniPoolOfflineClient';
 import { AavePoolOfflineClient } from './offlineClients/AavePoolOfflineClient';
 import { LbpPoolOfflineClient } from './offlineClients/LbpPoolOfflineClient';
 import { XykPoolOfflineClient } from './offlineClients/XykPoolOfflineClient';
-import { StablePoolOfflineClient } from './offlineClients/StablePoolOfflineClient';
+import { StableSwapOfflineClient } from './offlineClients/StableSwapOfflineClient';
 import { OfflinePoolClient } from './offlineClients/OfflinePoolClient';
 import { AssetOfflineClient } from './offlineClients/AssetOfflineClient';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
@@ -34,7 +34,7 @@ export class OfflinePoolService implements IPoolService {
   protected readonly xykOfflineClient: XykPoolOfflineClient;
   protected readonly omniOfflineClient: OmniPoolOfflineClient;
   protected readonly lbpOfflineClient: LbpPoolOfflineClient;
-  protected readonly stableOfflineClient: StablePoolOfflineClient;
+  protected readonly stableOfflineClient: StableSwapOfflineClient;
 
   protected readonly offlineClients: OfflinePoolClient[] = [];
 
@@ -45,7 +45,7 @@ export class OfflinePoolService implements IPoolService {
     this.aaveOfflineClient = new AavePoolOfflineClient(dataSource);
     this.xykOfflineClient = new XykPoolOfflineClient(dataSource);
     this.lbpOfflineClient = new LbpPoolOfflineClient(dataSource);
-    this.stableOfflineClient = new StablePoolOfflineClient(dataSource);
+    this.stableOfflineClient = new StableSwapOfflineClient(dataSource);
     this.omniOfflineClient = new OmniPoolOfflineClient(dataSource);
 
     this.offlineClients = [

@@ -80,6 +80,14 @@ export interface IPersistentLbpPoolBase {
   relayBlockNumber: number;
 }
 
+export interface IPersistentStableSwapBasePegSource {
+  sourceKind: string;
+  oracleName?: string;
+  oraclePeriod?: string;
+  oracleAsset?: string;
+  valuePoints?: string[];
+}
+
 export interface IPersistentStableSwapBase {
   id: string;
   address: string;
@@ -95,6 +103,9 @@ export interface IPersistentStableSwapBase {
   blockNumber: number;
   fee: number;
   totalIssuance: string;
+  pegs: string[][];
+  maxPegUpdate?: number;
+  pegSources?: IPersistentStableSwapBasePegSource[];
 }
 
 export interface IPersistentOmniPoolBase {
