@@ -148,6 +148,7 @@ export class OfflinePoolUtils {
         dynamicFee,
       } = pAsset;
       // TODO add values validation
+
       return {
         id,
         decimals,

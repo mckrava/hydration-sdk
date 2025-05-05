@@ -52,23 +52,15 @@ export class OmniPoolOfflineClient extends OfflinePoolClient {
       oraclePeriod,
       oracleKey(feeAsset)
     );
-    const oracleProtocolFee = this.getAssetEmaOracleEntry(
-      oracleName,
-      oraclePeriod,
-      oracleKey(protocolAsset)
-    );
 
-    // const [blockNumber, dynamicFees, oracleAssetFee, oracleProtocolFee] =
-    //   await Promise.all([
-    //     this.api.query.system.number(),
-    //     this.api.query.dynamicFees.assetFee(feeAsset),
-    //     this.api.query.emaOracle.oracles<
-    //       Option<ITuple<[PalletEmaOracleOracleEntry, u32]>>
-    //     >(oracleName, oracleKey(feeAsset), oraclePeriod),
-    //     this.api.query.emaOracle.oracles<
-    //       Option<ITuple<[PalletEmaOracleOracleEntry, u32]>>
-    //     >(oracleName, oracleKey(protocolAsset), oraclePeriod),
-    //   ]);
+    const oracleProtocolFee =
+      protocolAsset !== HUB_ASSET_ID
+        ? this.getAssetEmaOracleEntry(
+            oracleName,
+            oraclePeriod,
+            oracleKey(protocolAsset)
+          )
+        : null;
 
     const [assetFeeMin, assetFee, assetFeeMax] = this.getAssetFee(
       poolPair,
@@ -78,13 +70,13 @@ export class OmniPoolOfflineClient extends OfflinePoolClient {
     );
 
     const [protocolFeeMin, protocolFee, protocolFeeMax] =
-      protocolAsset === HUB_ASSET_ID
+      protocolAsset === HUB_ASSET_ID || !oracleProtocolFee
         ? [0, 0, 0] // No protocol fee for LRNA sell
         : this.getProtocolFee(
             poolPair,
             blockNumber,
             dynamicFees,
-            oracleProtocolFee
+            oracleProtocolFee!
           );
 
     const min = assetFeeMin + protocolFeeMin;
@@ -180,7 +172,7 @@ export class OmniPoolOfflineClient extends OfflinePoolClient {
     const { assetIn, balanceIn } = poolPair;
 
     const { minFee, maxFee, decay, amplification } =
-      this.constants.dynamicFeesAssetFeeParameters;
+      this.constants.dynamicFeesProtocolFeeParameters;
 
     const feeMin = toPoolFee(minFee);
     const feeMax = toPoolFee(maxFee);

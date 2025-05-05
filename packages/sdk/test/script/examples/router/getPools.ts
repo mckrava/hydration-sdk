@@ -7,9 +7,7 @@ import { ApiUrl } from '../../types';
 class GetPoolsExample extends PolkadotExecutor {
   async script(api: ApiPromise): Promise<any> {
     const poolService = new PoolService(api);
-    const router = new TradeRouter(poolService, {
-      includeOnly: [PoolType.Omni],
-    });
+    const router = new TradeRouter(poolService);
     return router.getPools();
   }
 }
