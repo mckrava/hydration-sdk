@@ -27,6 +27,7 @@
     "build": "npm run clean && node ./esbuild.dist.mjs",
     "build:watch": "node ./esbuild.dev.mjs",
     "postbuild": "tsc --emitDeclarationOnly --outDir build/types/",
+    "postinstall": "npm run build",
     "clean": "rimraf build",
     "link": "npm ln",
     "test": "NODE_NO_WARNINGS=1 jest"
