@@ -1,5 +1,5 @@
 import { ApiPromise } from '@polkadot/api';
-import { PoolService, TradeRouter } from '../../../../src';
+import { PoolService, PoolType, TradeRouter } from '../../../../src';
 
 import { PolkadotExecutor } from '../../PjsExecutor';
 import { ApiUrl } from '../../types';
