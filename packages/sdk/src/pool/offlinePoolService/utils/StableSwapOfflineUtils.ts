@@ -26,8 +26,14 @@ export class StableSwapOfflineUtils {
       return this.getPoolDefaultPegs({ poolFee: src.fee, assets: src.tokens });
     }
 
+    // TODO Should be reviewed
+    const sortedAssetIds = src.tokens
+      .map((t) => Number(t.id))
+      .sort((a, b) => a - b)
+      .map((id) => id.toString());
+
     const latestPegs = StableSwapOfflineUtils.getLatestPegs({
-      poolAssetIds: src.tokens.map((t) => t.id),
+      poolAssetIds: sortedAssetIds,
       pegSources: src.pegSources,
       blockNumber: metaData.paraBlockNumber.toString(),
       emaOraclesData,
