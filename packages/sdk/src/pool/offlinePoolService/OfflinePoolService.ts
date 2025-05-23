@@ -1,18 +1,5 @@
 import { memoize1 } from '@thi.ng/memoize';
 import { PoolNotFound } from '../../errors';
-import {
-  Asset,
-  ExternalAsset,
-  Hop,
-  IPoolService,
-  Pool,
-  PoolBase,
-  PoolFees,
-  PoolPair,
-  PoolType,
-  Transaction,
-} from '../../types';
-import { BigNumber, bnum, scale } from '../../utils/bignumber';
 
 import { IOfflinePoolServiceDataSource, PersistentAsset } from './types';
 import { OmniPoolOfflineClient } from './offlineClients/OmniPoolOfflineClient';
@@ -22,10 +9,15 @@ import { XykPoolOfflineClient } from './offlineClients/XykPoolOfflineClient';
 import { StableSwapOfflineClient } from './offlineClients/StableSwapOfflineClient';
 import { OfflinePoolClient } from './offlineClients/OfflinePoolClient';
 import { AssetOfflineClient } from './offlineClients/AssetOfflineClient';
-import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
-import { buildRoute } from '../PoolUtils';
-
-// export * from './types';
+import {
+  Hop,
+  IPoolService,
+  Pool,
+  PoolBase,
+  PoolFees,
+  PoolPair,
+  PoolType,
+} from '../types';
 
 export class OfflinePoolService implements IPoolService {
   protected readonly assetOfflineClient: AssetOfflineClient;
@@ -117,40 +109,5 @@ export class OfflinePoolService implements IPoolService {
 
   private isDirectOmnipoolTrade(route: Hop[]) {
     return route.length == 1 && route[0].pool == PoolType.Omni;
-  }
-
-  buildBuyTx(
-    assetIn: string,
-    assetOut: string,
-    amountOut: BigNumber,
-    maxAmountIn: BigNumber,
-    route: Hop[]
-  ): Transaction {
-    throw Error(
-      'Method is not allowed for OfflinePoolService. Use PoolService instead.'
-    );
-  }
-
-  buildSellTx(
-    assetIn: string,
-    assetOut: string,
-    amountIn: BigNumber,
-    minAmountOut: BigNumber,
-    route: Hop[]
-  ): Transaction {
-    throw Error(
-      'Method is not allowed for OfflinePoolService. Use PoolService instead.'
-    );
-  }
-
-  buildSellAllTx(
-    assetIn: string,
-    assetOut: string,
-    minAmountOut: BigNumber,
-    route: Hop[]
-  ): Transaction {
-    throw Error(
-      'Method is not allowed for OfflinePoolService. Use PoolService instead.'
-    );
   }
 }

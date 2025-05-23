@@ -1,6 +1,6 @@
 import { OfflinePoolClient } from './OfflinePoolClient';
 import { IOfflinePoolServiceDataSource } from '../types';
-import { PoolFee, PoolFees, PoolPair, PoolType } from '../../../types';
+import { PoolFee, PoolFees, PoolPair, PoolType } from '../../types';
 import { StableSwapBase, StableSwapFees } from '../../stable/StableSwap';
 
 export class StableSwapOfflineClient extends OfflinePoolClient {

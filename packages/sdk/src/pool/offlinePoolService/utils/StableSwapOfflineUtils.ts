@@ -7,10 +7,11 @@ import {
 } from '../types';
 import { AMOUNT_MAX, StableMath, StableSwapBase } from '../../stable';
 import { toPoolFee } from '../../../utils/mapper';
-import { Asset, PoolFee, PoolToken } from '../../../types';
+import { Asset } from '../../../types';
 import { OfflinePoolUtils } from './OfflinePoolUtils';
 import { BigNumber } from '../../../utils/bignumber';
 import { TRADEABLE_DEFAULT } from '../../../consts';
+import { PoolFee, PoolToken } from '../../types';
 
 export class StableSwapOfflineUtils {
   static getStableswapPegsFromPersistentData({

@@ -6,11 +6,10 @@ import {
   IOfflinePoolServiceDataSource,
   IPersistentEmaOracleEntryData,
 } from '../types';
-import { PoolFees, PoolPair, PoolType } from '../../../types';
+import { PoolFees, PoolPair, PoolType } from '../../types';
 import { HUB_ASSET_ID, SYSTEM_ASSET_ID } from '../../../consts';
 import { toPct, toPoolFee } from '../../../utils/mapper';
-import { OmniPoolFees } from '../../omni/OmniPool';
-import { OmniMath } from '../../omni/OmniMath';
+import { OmniPoolFees, OmniMath } from '../../omni';
 
 type OmniPoolFeeRange = [number, number, number];
 

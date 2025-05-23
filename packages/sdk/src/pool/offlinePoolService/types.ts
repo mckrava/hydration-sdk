@@ -1,7 +1,8 @@
-import { Asset, PoolBase, PoolToken, PoolType } from '../../types';
-import { LbpPoolBase } from '../lbp/LbpPool';
-import { StableSwapBase } from '../stable/StableSwap';
-import { OmniPoolBase } from '../omni/OmniPool';
+import { Asset } from '../../types';
+import { PoolBase, PoolToken, PoolType } from '../types';
+import { LbpPoolBase } from '../lbp';
+import { StableSwapBase } from '../stable';
+import { OmniPoolBase } from '../omni';
 
 export enum AssetType {
   Bond = 'Bond',

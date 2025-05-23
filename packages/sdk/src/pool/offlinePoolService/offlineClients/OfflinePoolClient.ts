@@ -1,11 +1,10 @@
-import { Asset, PoolBase, PoolFees, PoolPair, PoolType } from '../../../types';
+import { PoolBase, PoolFees, PoolPair, PoolType } from '../../types';
 import {
   AssetDynamicFee,
   EmaOraclePeriod,
   EmaOracleSource,
   IOfflinePoolServiceDataSource,
   IPersistentConstants,
-  IPersistentEmaOracleEntry,
   IPersistentEmaOracleEntryData,
   IPersistentMetaData,
   PersistentAsset,

@@ -3,7 +3,6 @@ import {
   EmaOraclePeriod,
   EmaOracleSource,
   IOfflinePoolServiceDataSource,
-  IPersistentConstants,
   IPersistentDataInput,
   IPersistentEmaOracleEntry,
   IPersistentEmaOracleEntryData,
@@ -16,13 +15,11 @@ import {
   IPersistentStableSwapBase,
   PersistentAsset,
 } from '../types';
-import { Asset, PoolBase, PoolFee, PoolToken, PoolType } from '../../../types';
-import { StableMath } from '../../stable/StableMath';
+import { PoolBase, PoolFee, PoolToken, PoolType } from '../../types';
+import { StableMath, StableSwapBase } from '../../stable';
 import { toPoolFee } from '../../../utils/mapper';
-import { OmniPoolBase, OmniPoolToken } from '../../omni/OmniPool';
-import { LbpPoolBase, WeightedPoolToken } from '../../lbp/LbpPool';
-import { LbpMath } from '../../lbp/LbpMath';
-import { StableSwapBase } from '../../stable/StableSwap';
+import { OmniPoolBase, OmniPoolToken } from '../../omni';
+import { LbpPoolBase, WeightedPoolToken, LbpMath } from '../../lbp';
 import { StableSwapOfflineUtils } from './StableSwapOfflineUtils';
 
 export class OfflinePoolUtils {

@@ -1,7 +1,7 @@
 import { OfflinePoolClient } from './OfflinePoolClient';
 import { IOfflinePoolServiceDataSource } from '../types';
-import { PoolFee, PoolFees, PoolPair, PoolType } from '../../../types';
-import { LbpPoolBase, LbpPoolFees } from '../../lbp/LbpPool';
+import { PoolFee, PoolFees, PoolPair, PoolType } from '../../types';
+import { LbpPoolBase, LbpPoolFees } from '../../lbp';
 
 export class LbpPoolOfflineClient extends OfflinePoolClient {
   constructor(dataSource: IOfflinePoolServiceDataSource) {
