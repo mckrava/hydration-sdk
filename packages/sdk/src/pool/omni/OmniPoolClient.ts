@@ -15,7 +15,8 @@ import {
   SYSTEM_ASSET_ID,
 } from '../../consts';
 import { bnum } from '../../utils/bignumber';
-import { toPct, toPoolFee } from '../../utils/mapper';
+import { toDecimals, toPoolFee } from '../../utils/mapper';
+
 import {
   PoolBase,
   PoolType,
@@ -23,12 +24,11 @@ import {
   PoolLimits,
   PoolFees,
   PoolPair,
-} from '../../types';
+} from '../types';
+import { PoolClient } from '../PoolClient';
 
 import { OmniMath } from './OmniMath';
 import { OmniPoolFees, OmniPoolToken } from './OmniPool';
-
-import { PoolClient } from '../PoolClient';
 
 type OmniPoolFeeRange = [number, number, number];
 
@@ -199,7 +199,7 @@ export class OmniPoolClient extends PoolClient {
     const [entry] = oracle.unwrap();
     const { assetFee, timestamp } = dynamicFee.unwrap();
 
-    const blockDifference = blockNumber - timestamp.toNumber();
+    const blockDifference = Math.max(1, blockNumber - timestamp.toNumber());
 
     let oracleAmountIn = entry.volume.bIn.toString();
     let oracleAmountOut = entry.volume.bOut.toString();
@@ -218,14 +218,14 @@ export class OmniPoolClient extends PoolClient {
       oracleLiquidity,
       '9',
       balanceOut.toString(),
-      toPct(feePrev).toString(),
+      toDecimals(feePrev).toString(),
       blockDifference.toString(),
-      toPct(feeMin).toString(),
-      toPct(feeMax).toString(),
+      toDecimals(feeMin).toString(),
+      toDecimals(feeMax).toString(),
       decay.toString(),
       amplification.toString()
     );
-    return [minFee.toNumber(), Number(fee) * 10000, maxFee.toNumber()];
+    return [minFee.toNumber(), Number(fee) * 1000000, maxFee.toNumber()];
   }
 
   private getProtocolFee(
@@ -249,7 +249,7 @@ export class OmniPoolClient extends PoolClient {
     const [entry] = oracle.unwrap();
     const { protocolFee, timestamp } = dynamicFee.unwrap();
 
-    const blockDifference = blockNumber - timestamp.toNumber();
+    const blockDifference = Math.max(1, blockNumber - timestamp.toNumber());
 
     let oracleAmountIn = entry.volume.bIn.toString();
     let oracleAmountOut = entry.volume.bOut.toString();
@@ -268,14 +268,14 @@ export class OmniPoolClient extends PoolClient {
       oracleLiquidity,
       '9',
       balanceIn.toString(),
-      toPct(feePrev).toString(),
+      toDecimals(feePrev).toString(),
       blockDifference.toString(),
-      toPct(feeMin).toString(),
-      toPct(feeMax).toString(),
+      toDecimals(feeMin).toString(),
+      toDecimals(feeMax).toString(),
       decay.toString(),
       amplification.toString()
     );
-    return [minFee.toNumber(), Number(fee) * 10000, maxFee.toNumber()];
+    return [minFee.toNumber(), Number(fee) * 1000000, maxFee.toNumber()];
   }
 
   private getPoolId(): string {
