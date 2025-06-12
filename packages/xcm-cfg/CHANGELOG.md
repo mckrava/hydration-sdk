@@ -1,5 +1,44 @@
 # @galacticcouncil/xcm-cfg
 
+## 10.2.0
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/sdk@9.0.0
+
+## 10.1.0
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/sdk@8.1.0
+
+## 10.0.1
+
+### Patch Changes
+
+- Drop wss://rpc.hydradx.cloud from rpc list
+
+## 10.0.0
+
+### Major Changes
+
+- Enable relay / hub dryRun2 / xcmPaymentApi
+- Upgrade to pjs 16.x @see patch
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/xcm-core@8.0.0
+  - @galacticcouncil/sdk@8.0.0
+
+## 9.2.2
+
+### Patch Changes
+
+- Temp fix broken relay / hub dryRun2 / xcmPaymentApi
+
 ## 9.2.1
 
 ### Patch Changes

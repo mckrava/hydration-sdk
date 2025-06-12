@@ -1,22 +1,20 @@
-import { TradeRouter, PoolService } from '@galacticcouncil/sdk';
+import { createSdkContext, PoolType } from '@galacticcouncil/sdk';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 
-import { degen } from './external';
+const ws = 'wss://hydration-rpc.n.dwellir.com';
 
-const wsProvider = new WsProvider('wss://rpc.hydradx.cloud');
-const api = await ApiPromise.create({ provider: wsProvider });
+const wsProvider = new WsProvider(ws, 2_500, {}, 60_000, 102400, 10 * 60_000);
+const apiPromise = await ApiPromise.create({ provider: wsProvider });
 
-// Initialize Trade Router
-const poolService = new PoolService(api);
-const tradeRouter = new TradeRouter(poolService);
+const sdk = createSdkContext(apiPromise);
 
-await poolService.syncRegistry(degen);
+const { api } = sdk;
 
-// Do something
-const result = await tradeRouter.getAllAssets();
-console.log(result);
+const pools = await api.router.getPools();
+console.log(pools.filter((p) => p.type === PoolType.Stable));
 
 setTimeout(() => {
-  poolService.unsubscribe();
+  sdk.destroy();
+  apiPromise.disconnect();
   console.log('Unsubscribed');
 }, 60000);

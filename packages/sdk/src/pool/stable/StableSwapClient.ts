@@ -9,7 +9,7 @@ import { Option, u32 } from '@polkadot/types-codec';
 import { ITuple } from '@polkadot/types-codec/types';
 
 import { HYDRADX_SS58_PREFIX, TRADEABLE_DEFAULT } from '../../consts';
-import { toPoolFee } from '../../utils/mapper';
+import { FeeUtils } from '../../utils/fee';
 
 import {
   PoolBase,
@@ -67,7 +67,7 @@ export class StableSwapClient extends PoolClient {
           address: poolAddress,
           id: poolId,
           type: PoolType.Stable,
-          fee: toPoolFee(pool.fee.toNumber()),
+          fee: FeeUtils.fromPermill(pool.fee.toNumber()),
           tokens: poolTokens,
           ...poolDelta,
           ...poolPegs,
@@ -166,7 +166,7 @@ export class StableSwapClient extends PoolClient {
     const defaultFee = poolInfo.fee;
     const defaultPegs = StableMath.defaultPegs(poolInfo.assets.length);
     return {
-      pegsFee: toPoolFee(defaultFee.toNumber()),
+      pegsFee: FeeUtils.fromPermill(defaultFee.toNumber()),
       pegs: defaultPegs,
     };
   }
@@ -202,7 +202,7 @@ export class StableSwapClient extends PoolClient {
 
     const updatedFeePermill = Number(updatedFee) * 10000;
     return {
-      pegsFee: toPoolFee(updatedFeePermill),
+      pegsFee: FeeUtils.fromPermill(updatedFeePermill),
       pegs: updatedPegs,
     };
   }
@@ -228,7 +228,6 @@ export class StableSwapClient extends PoolClient {
     const latest = source.map(async (s, i) => {
       if (s.isOracle) {
         const [oracleName, oraclePeriod, oracleAsset] = s.asOracle;
-
         const oracleKey = [oracleAsset.toString(), assets[i]]
           .map((a) => Number(a))
           .sort((a, b) => a - b);
@@ -244,6 +243,17 @@ export class StableSwapClient extends PoolClient {
         return oracleAsset.toString() === oracleKey[0].toString()
           ? [[priceNum, priceDenom], updatedAt.toString()]
           : [[priceDenom, priceNum], updatedAt.toString()];
+      } else if (s.isMmOracle) {
+        const h160 = s.asMmOracle;
+        const { price, decimals, updatedAt } = await this.mmOracle.getData(
+          h160.toString()
+        );
+
+        const priceDenom = 10 ** decimals;
+        return [
+          [price.toString(), priceDenom.toString()],
+          updatedAt.toString(),
+        ];
       } else {
         return [s.asValue.map((p) => p.toString()), blockNumber];
       }
