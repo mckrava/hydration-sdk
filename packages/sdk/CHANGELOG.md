@@ -1,5 +1,69 @@
 # @galacticcouncil/sdk
 
+## 9.0.1
+
+### Patch Changes
+
+- Fix tx eligible for sellAll
+
+## 9.0.0
+
+### Major Changes
+
+[4c1f73f2]: https://github.com/galacticcouncil/sdk/commit/4c1f73f2
+[8ab43456]: https://github.com/galacticcouncil/sdk/commit/8ab43456
+[7ac95e0f]: https://github.com/galacticcouncil/sdk/commit/7ac95e0f
+[3613c7b2]: https://github.com/galacticcouncil/sdk/commit/3613c7b2
+
+- [[#4c1f73f2][4c1f73f2]] sdk: stableswap mm oracle support
+- [[#8ab43456][8ab43456]] aave: fix sellAll calc
+- [[#7ac95e0f][7ac95e0f]] sdk: evm share ws conn
+- [[#3613c7b2][3613c7b2]] aave: fix liq index calc
+
+## 8.1.1
+
+### Patch Changes
+
+- Allow passing opt assets to balance subscribe (revert)
+
+## 8.1.0
+
+### Minor Changes
+
+⚠️ Important: TxUtils were dropped, use TxBuilderFactory
+
+[6685efaa]: https://github.com/galacticcouncil/sdk/commit/6685efaa
+[b8999637]: https://github.com/galacticcouncil/sdk/commit/b8999637
+[2aa74490]: https://github.com/galacticcouncil/sdk/commit/2aa74490
+[1f8d83ae]: https://github.com/galacticcouncil/sdk/commit/1f8d83ae
+[7ffcfe8b]: https://github.com/galacticcouncil/sdk/commit/7ffcfe8b
+[06123937]: https://github.com/galacticcouncil/sdk/commit/06123937
+
+- [[#6685efaa][6685efaa]] sdk: fix aave max tx build
+- [[#b8999637][b8999637]] sdk: tx module
+- [[#2aa74490][2aa74490]] scheduler: sdk context support
+- [[#1f8d83ae][1f8d83ae]] scheduler: sdk context factory
+- [[#06123937][06123937]] scheduler: dca & twap init
+
+## 8.0.1
+
+### Patch Changes
+
+- Drop wss://rpc.hydradx.cloud from rpc list
+
+## 8.0.0
+
+### Major Changes
+
+⚠️ Important: In the 8.x release, we upgraded `@polkadot/api` to version **16.x**.
+
+To ensure the router works as expected, **either**:
+
+1. Use a custom `WsProvider` configuration with cache TTL at least 10 minutes
+2. Use a custom `WsProvider` configuration with cache TTL disabled (null)
+
+For more details visit [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
+
 ## 7.2.0
 
 ### Minor Changes
