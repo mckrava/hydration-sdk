@@ -1,5 +1,58 @@
 # @galacticcouncil/sdk
 
+## 9.5.1
+
+### Patch Changes
+
+- Revert range calc
+
+## 9.5.0
+
+### Minor Changes
+
+[2f687c3a]: https://github.com/galacticcouncil/sdk/commit/2f687c3a
+
+- [[#2f687c3a][2f687c3a]] sdk: fix stableswap effective fee calc, re-work FeeUtils
+
+## 9.4.0
+
+### Minor Changes
+
+- WASM refactor: https://github.com/galacticcouncil/HydraDX-wasm/pull/40
+
+### Patch Changes
+
+- Updated dependencies
+  - @galacticcouncil/math-liquidity-mining@1.2.0
+  - @galacticcouncil/math-stableswap@2.2.0
+  - @galacticcouncil/math-omnipool@1.3.0
+  - @galacticcouncil/math-lbp@1.2.0
+  - @galacticcouncil/math-xyk@1.2.0
+
+## 9.3.0
+
+### Minor Changes
+
+[50ae7924]: https://github.com/galacticcouncil/sdk/commit/50ae7924
+
+- [[#50ae7924][50ae7924]] aave: calculates withdrawable based on excess HF
+
+## 9.2.0
+
+### Minor Changes
+
+[aaf6f862]: https://github.com/galacticcouncil/sdk/commit/aaf6f862
+[b1cb49da]: https://github.com/galacticcouncil/sdk/commit/b1cb49da
+
+- [[#aaf6f862][aaf6f862]] oracle: fallback to 0 if updated block negative
+- [[#b1cb49da][b1cb49da]] sdk: min order budget public accessor
+
+## 9.1.0
+
+### Minor Changes
+
+- Pass optional extra gas in transaction dto
+
 ## 9.0.1
 
 ### Patch Changes
