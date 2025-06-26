@@ -1,5 +1,23 @@
 # @galacticcouncil/sdk
 
+## 9.5.4
+
+### Patch Changes
+
+- 0aa7120: Fix negative free balance
+
+## 9.5.3
+
+### Patch Changes
+
+- fix: token balance free calc
+
+## 9.5.2
+
+### Patch Changes
+
+- Update twap api accessors
+
 ## 9.5.1
 
 ### Patch Changes
