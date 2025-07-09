@@ -1,5 +1,29 @@
 # @galacticcouncil/sdk
 
+## 9.6.3
+
+### Patch Changes
+
+- fix aave token liq calc
+
+## 9.6.2
+
+### Patch Changes
+
+- Use virtual share issuance for liquidity route calc
+
+## 9.6.1
+
+### Patch Changes
+
+- fix evm client init
+
+## 9.6.0
+
+### Minor Changes
+
+- sdk: bfs max path +1
+
 ## 9.5.4
 
 ### Patch Changes
