@@ -29,8 +29,6 @@ import { PoolClient } from '../PoolClient';
 import { StableMath } from './StableMath';
 import { StableSwapBase, StableSwapFees } from './StableSwap';
 
-export const AMOUNT_MAX = 340282366920938463463374607431768211455n;
-
 export class StableSwapClient extends PoolClient {
   private stablePools: Map<string, PalletStableswapPoolInfo> = new Map([]);
 
@@ -56,30 +54,43 @@ export class StableSwapClient extends PoolClient {
         },
         state,
       ]) => {
-        const pool: PalletStableswapPoolInfo = state.unwrap();
-        const poolId = id.toString();
-        const poolAddress = this.getPoolAddress(poolId);
+        try {
+          const pool: PalletStableswapPoolInfo = state.unwrap();
+          const poolId = id.toString();
+          const poolAddress = this.getPoolAddress(poolId);
 
-        const [poolDelta, poolTokens, poolPegs] = await Promise.all([
-          this.getPoolDelta(poolId, pool, blockNumber.toString()),
-          this.getPoolTokens(poolAddress, poolId, pool),
-          this.getPoolPegs(poolId, pool, blockNumber.toString()),
-        ]);
+          const [poolDelta, poolTokens, poolPegs] = await Promise.all([
+            this.getPoolDelta(poolId, pool, blockNumber.toString()),
+            this.getPoolTokens(poolAddress, poolId, pool),
+            this.getPoolPegs(poolId, pool, blockNumber.toString()),
+          ]);
 
-        this.stablePools.set(poolAddress, pool);
-        return {
-          address: poolAddress,
-          id: poolId,
-          type: PoolType.Stable,
-          fee: FeeUtils.fromPermill(pool.fee.toNumber()),
-          tokens: poolTokens,
-          ...poolDelta,
-          ...poolPegs,
-          ...this.getPoolLimits(),
-        } as PoolBase;
+          // add virtual share (routing)
+          poolTokens.push({
+            id: poolId,
+            tradeable: TRADEABLE_DEFAULT,
+            balance: poolDelta.totalIssuance,
+          } as PoolToken);
+
+          this.stablePools.set(poolAddress, pool);
+          return {
+            address: poolAddress,
+            id: poolId,
+            type: PoolType.Stable,
+            fee: FeeUtils.fromPermill(pool.fee.toNumber()),
+            tokens: poolTokens,
+            ...poolDelta,
+            ...poolPegs,
+            ...this.getPoolLimits(),
+          } as PoolBase;
+        } catch (e) {
+          console.warn(`Skipping pool ${id.toString()}\n`, String(e));
+          return null;
+        }
       }
     );
-    return Promise.all(stablePools);
+    const results = await Promise.all(stablePools);
+    return results.filter((pool): pool is PoolBase => pool !== null);
   }
 
   async getPoolFees(_poolPair: PoolPair, address: string): Promise<PoolFees> {
@@ -104,7 +115,18 @@ export class StableSwapClient extends PoolClient {
           this.getPoolDelta(pool.id!, stablePool, blockNumber),
           this.getPoolPegs(pool.id!, stablePool, blockNumber),
         ]);
-        Object.assign(pool, poolDelta, poolPegs);
+
+        const tokens = pool.tokens.map((t) => {
+          if (t.id === pool.id) {
+            return {
+              ...t,
+              balance: poolDelta.totalIssuance,
+            };
+          }
+          return t;
+        });
+
+        Object.assign(pool, { tokens: tokens }, poolDelta, poolPegs);
       }
     });
   }
@@ -113,7 +135,7 @@ export class StableSwapClient extends PoolClient {
     poolId: string,
     poolInfo: PalletStableswapPoolInfo,
     blockNumber: string
-  ): Promise<Partial<StableSwapBase>> {
+  ): Promise<Pick<StableSwapBase, 'amplification' | 'totalIssuance'>> {
     const {
       initialAmplification,
       finalAmplification,
@@ -133,7 +155,7 @@ export class StableSwapClient extends PoolClient {
     return {
       amplification: amplification,
       totalIssuance: totalIssuance.toString(),
-    } as Partial<StableSwapBase>;
+    } as Pick<StableSwapBase, 'amplification' | 'totalIssuance'>;
   }
 
   private async getPoolTokens(
@@ -156,14 +178,7 @@ export class StableSwapClient extends PoolClient {
       } as PoolToken;
     });
 
-    const tokens = await Promise.all(poolTokens);
-    tokens.push({
-      id: poolId,
-      tradeable: TRADEABLE_DEFAULT,
-      balance: AMOUNT_MAX.toString(),
-    } as PoolToken);
-
-    return tokens;
+    return Promise.all(poolTokens);
   }
 
   private getPoolDefaultPegs(poolInfo: PalletStableswapPoolInfo) {
@@ -258,8 +273,10 @@ export class StableSwapClient extends PoolClient {
           [price.toString(), priceDenom.toString()],
           updatedAt.toString(),
         ];
-      } else {
+      } else if (s.isValue) {
         return [s.asValue.map((p) => p.toString()), blockNumber];
+      } else {
+        throw Error(s.type + ' is not supported');
       }
     });
     return Promise.all(latest);
