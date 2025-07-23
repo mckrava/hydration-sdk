@@ -1,5 +1,30 @@
 # @galacticcouncil/sdk
 
+## 9.9.1
+
+### Patch Changes
+
+- fix: suggester use all paths in trusted set
+
+## 9.9.0
+
+### Minor Changes
+
+- 5de2359: sdk: speed up bfs by pre-filtering the relevant amms
+
+## 9.8.0
+
+### Minor Changes
+
+- 3ec8fb7: fee memo short term dedup
+- c974dd0: route proposals cache
+
+## 9.7.0
+
+### Minor Changes
+
+- cf0aee6: BalanceClientV2 supporting whole balance breakdown
+
 ## 9.6.3
 
 ### Patch Changes
@@ -10,7 +35,7 @@
 
 ### Patch Changes
 
-- Use virtual share issuance for liquidity route calc
+- use virtual share issuance for liquidity route calc
 
 ## 9.6.1
 
